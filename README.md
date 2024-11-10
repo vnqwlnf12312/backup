@@ -28,7 +28,7 @@ restore принимает два пути restore_from и restore_to, отку�
 
 ```
 ./backup --type=full ./workdir ./backupdir
-./restore ./backupdir/2024-10-3_12-10-10/ ./appliedbackup
+./restore ./backupdir/2024-10-03_12-10-10/ ./appliedbackup
 ```
 
 # Решение
