@@ -103,12 +103,9 @@ void DoRestore(const std::string& restore_from, const std::string& restore_to) {
   system::error_code error_code;
 
   filesystem::path from_path = utils::Canonize(restore_from);
-  if (from_path.empty()) {
-    return;
-  }
 
   bool from_is_directory = filesystem::is_directory(from_path, error_code);
-  if (error_code.failed()) {
+  if (error_code.failed() && error_code != system::errc::no_such_file_or_directory) {
     throw std::runtime_error(
         std::format("failed to check if {} is directory. error message: {}",
                     from_path.string(), error_code.what()));
@@ -116,47 +113,37 @@ void DoRestore(const std::string& restore_from, const std::string& restore_to) {
 
   if (!from_is_directory) {
     throw std::runtime_error(std::format(
-        "can't restore from path {} doesn't exist or is not directory\n",
+        "can't restore from path {} doesn't exist or is not directory",
         from_path.string()));
   }
 
   filesystem::path to_path = restore_to;
-  filesystem::create_directories(to_path, error_code);
-  if (error_code.failed()) {
-    throw std::runtime_error(
-        std::format("failed to create directory {}. error message: {}",
-                    to_path.string(), error_code.what()));
-  }
-
-  to_path = utils::Canonize(to_path);
-  if (to_path.empty()) {
-    return;
-  }
 
   bool to_is_directory = filesystem::is_directory(to_path, error_code);
-  if (error_code.failed()) {
-    std::cout << std::format(
+  if (error_code.failed() &&
+      error_code != system::errc::no_such_file_or_directory) {
+    throw std::runtime_error(std::format(
         "failed to check if {} is directory. error message: {}",
-        to_path.string(), error_code.what());
-    return;
+        to_path.string(), error_code.what()));
   }
 
   if (to_is_directory) {
     filesystem::remove_all(to_path, error_code);
     if (error_code.failed()) {
-      std::cout << std::format(
+      throw std::runtime_error(std::format(
           "failed to delete directory {}. error message: {}", to_path.string(),
-          error_code.what());
-      return;
+          error_code.what()));
     }
   }
 
   filesystem::create_directories(to_path, error_code);
-  if (error_code.failed() && error_code != system::errc::file_exists) {
+  if (error_code.failed()) {
     throw std::runtime_error(
-        std::format("can't create {} directory for backup. error message: {}\n",
+        std::format("can't create {} directory for backup. error message: {}",
                     to_path.string(), error_code.what()));
   }
+
+  to_path = utils::Canonize(to_path);
 
   if (utils::GetBackupTag(from_path) == utils::kFullTag) {
     RestoreBackup(from_path, to_path, filesystem::copy_options::copy_symlinks);
@@ -165,10 +152,9 @@ void DoRestore(const std::string& restore_from, const std::string& restore_to) {
 
   const auto last_full_backup_path = FindLastFullBackup(from_path);
   if (last_full_backup_path.string().empty()) {
-    std::cout << std::format(
+    throw std::runtime_error(std::format(
         "failed to find previous full backup for given incremental backup {}",
-        from_path.string());
-    return;
+        from_path.string()));
   }
 
   RestoreBackup(last_full_backup_path, to_path,

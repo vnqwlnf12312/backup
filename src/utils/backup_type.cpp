@@ -1,7 +1,7 @@
 #include "backup_type.hpp"
 
+#include <exception>
 #include <format>
-#include <iostream>
 
 #include <boost/filesystem/fstream.hpp>
 
@@ -11,9 +11,8 @@ std::string GetBackupTag(const filesystem::path& path) {
   const auto tag_path = path / kBackupTag;
   filesystem::ifstream tag_stream(tag_path);
   if (!tag_stream.is_open()) {
-    std::cout << std::format("can't read {} to verify backup type",
-                             tag_path.string());
-    return {};
+    throw std::runtime_error(
+        std::format("can't read {} to verify backup type", tag_path.string()));
   }
   std::string tag;
   tag_stream >> tag;

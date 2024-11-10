@@ -9,8 +9,8 @@
 #include <set>
 
 #include <utils/backup_type.hpp>
-#include <utils/get_current_time.hpp>
 #include <utils/canonize.hpp>
+#include <utils/get_current_time.hpp>
 
 namespace core {
 
