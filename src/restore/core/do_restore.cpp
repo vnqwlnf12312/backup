@@ -121,7 +121,8 @@ void DoRestore(const std::string& restore_from, const std::string& restore_to) {
   }
 
   filesystem::path to_path = restore_to;
-  if (!filesystem::create_directories(to_path, error_code)) {
+  filesystem::create_directories(to_path, error_code);
+  if (error_code.failed()) {
     throw std::runtime_error(
         std::format("failed to create directory {}. error message: {}",
                     to_path.string(), error_code.what()));

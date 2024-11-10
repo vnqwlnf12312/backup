@@ -1,2 +1,0 @@
-/Users/amir/anaconda3/bin/ar qc libparsing.a CMakeFiles/parsing.dir/parse_command_line.cpp.o
-/Users/amir/anaconda3/bin/ranlib libparsing.a

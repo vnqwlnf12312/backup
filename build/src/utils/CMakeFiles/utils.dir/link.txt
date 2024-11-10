@@ -1,2 +1,0 @@
-/Users/amir/anaconda3/bin/ar qc libutils.a CMakeFiles/utils.dir/get_current_time.cpp.o CMakeFiles/utils.dir/backup_type.cpp.o CMakeFiles/utils.dir/canonize.cpp.o
-/Users/amir/anaconda3/bin/ranlib libutils.a
