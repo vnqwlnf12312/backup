@@ -161,7 +161,7 @@ void DoRestore(const std::string& restore_from, const std::string& restore_to) {
                 filesystem::copy_options::copy_symlinks);
   RestoreBackup(from_path, to_path,
                 filesystem::copy_options::copy_symlinks |
-                    filesystem::copy_options::skip_existing);
+                    filesystem::copy_options::overwrite_existing);
 }
 
 }  // namespace core
