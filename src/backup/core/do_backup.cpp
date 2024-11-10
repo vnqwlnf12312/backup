@@ -10,6 +10,7 @@
 
 #include <utils/backup_type.hpp>
 #include <utils/get_current_time.hpp>
+#include <utils/canonize.hpp>
 
 namespace core {
 
@@ -26,7 +27,7 @@ std::pair<filesystem::path, filesystem::path> PrepareForBackup(
         "can't backup from path {} doesn't exist or is not directory\n",
         from_path.string()));
   }
-  from_path = filesystem::canonical(from_path);
+  from_path = utils::Canonize(from_path);
 
   const std::string now = utils::GetCurretTime();
 
@@ -40,7 +41,7 @@ std::pair<filesystem::path, filesystem::path> PrepareForBackup(
                     to_path.string(), error_code.what()));
   }
 
-  to_path = filesystem::canonical(to_path);
+  to_path = utils::Canonize(to_path);
 
   return {from_path, to_path};
 }

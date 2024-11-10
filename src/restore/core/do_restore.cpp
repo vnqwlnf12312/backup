@@ -6,6 +6,7 @@
 #include <boost/filesystem.hpp>
 
 #include <utils/backup_type.hpp>
+#include <utils/canonize.hpp>
 
 namespace core {
 
@@ -101,43 +102,52 @@ filesystem::path FindLastFullBackup(const filesystem::path& backup_path) {
 void DoRestore(const std::string& restore_from, const std::string& restore_to) {
   system::error_code error_code;
 
-  filesystem::path from_path = restore_from;
-
-  bool from_exists = filesystem::exists(from_path, error_code);
-  if (error_code.failed() &&
-      error_code != system::errc::no_such_file_or_directory) {
-    std::cout << std::format(
-        "failed to check {} for existance. error message: {}",
-        from_path.string(), error_code.what());
+  filesystem::path from_path = utils::Canonize(restore_from);
+  if (from_path.empty()) {
     return;
   }
 
   bool from_is_directory = filesystem::is_directory(from_path, error_code);
   if (error_code.failed()) {
-    std::cout << std::format(
-        "failed to check if {} is directory. error message: {}",
-        from_path.string(), error_code.what());
-    return;
+    throw std::runtime_error(
+        std::format("failed to check if {} is directory. error message: {}",
+                    from_path.string(), error_code.what()));
   }
 
-  if (!from_exists || !from_is_directory) {
+  if (!from_is_directory) {
     throw std::runtime_error(std::format(
         "can't restore from path {} doesn't exist or is not directory\n",
         from_path.string()));
   }
-  from_path = filesystem::canonical(from_path, error_code);
-  if (error_code.failed()) {
-    std::cout << std::format("failed to canonize {}. error message: {}",
-                             from_path.string(), error_code.what());
+
+  filesystem::path to_path = restore_to;
+  if (!filesystem::create_directories(to_path, error_code)) {
+    throw std::runtime_error(
+        std::format("failed to create directory {}. error message: {}",
+                    to_path.string(), error_code.what()));
+  }
+
+  to_path = utils::Canonize(to_path);
+  if (to_path.empty()) {
     return;
   }
 
-  filesystem::path to_path = filesystem::canonical(restore_to);
-
+  bool to_is_directory = filesystem::is_directory(to_path, error_code);
   if (error_code.failed()) {
-    std::cout << std::format("failed to canonize {}. error message: {}",
-                             to_path.string(), error_code.what());
+    std::cout << std::format(
+        "failed to check if {} is directory. error message: {}",
+        to_path.string(), error_code.what());
     return;
+  }
+
+  if (to_is_directory) {
+    filesystem::remove_all(to_path, error_code);
+    if (error_code.failed()) {
+      std::cout << std::format(
+          "failed to delete directory {}. error message: {}", to_path.string(),
+          error_code.what());
+      return;
+    }
   }
 
   filesystem::create_directories(to_path, error_code);
@@ -155,7 +165,7 @@ void DoRestore(const std::string& restore_from, const std::string& restore_to) {
   const auto last_full_backup_path = FindLastFullBackup(from_path);
   if (last_full_backup_path.string().empty()) {
     std::cout << std::format(
-        "failed to find previous full backup for given incrementak backup {}",
+        "failed to find previous full backup for given incremental backup {}",
         from_path.string());
     return;
   }

@@ -3,6 +3,7 @@ set(LIB_NAME utils)
 set(SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/get_current_time.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/backup_type.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/canonize.cpp
 )
 
 create_sources_list(${LIB_NAME})
