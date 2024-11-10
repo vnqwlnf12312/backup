@@ -6,4 +6,4 @@ namespace utils {
 
 std::string GetCurretTime();
 
-}
+}  // namespace utils

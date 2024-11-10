@@ -11,7 +11,8 @@ std::string GetBackupTag(const filesystem::path& path) {
   const auto tag_path = path / kBackupTag;
   filesystem::ifstream tag_stream(tag_path);
   if (!tag_stream.is_open()) {
-    std::cout << std::format("can't read {} to verify backup type", tag_path.string());
+    std::cout << std::format("can't read {} to verify backup type",
+                             tag_path.string());
     return {};
   }
   std::string tag;
@@ -25,4 +26,4 @@ void MakeBackupTag(const filesystem::path& path, std::string_view tag) {
   backup_tag.close();
 }
 
-}
+}  // namespace utils

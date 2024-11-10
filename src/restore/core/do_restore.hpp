@@ -4,7 +4,6 @@
 
 namespace core {
 
-void DoRestore(const std::string& restore_from,
-                  const std::string& restore_to);
+void DoRestore(const std::string& restore_from, const std::string& restore_to);
 
 }  // namespace core

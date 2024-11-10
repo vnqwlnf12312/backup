@@ -84,8 +84,8 @@ filesystem::path FindLastFullBackup(const filesystem::path& path) {
 /// file in base does nothing and return a symlink info, if file is symlink to
 /// file out of base, then simply copy symlink
 system::error_code CopyFile(const filesystem::path& file_path,
-                    const filesystem::path& destination_path,
-                    const filesystem::path& base) {
+                            const filesystem::path& destination_path,
+                            const filesystem::path& base) {
   system::error_code error_code;
 
   filesystem::copy(file_path, destination_path,
@@ -99,8 +99,8 @@ system::error_code CopyFile(const filesystem::path& file_path,
   return error_code;
 }
 
-std::pair<bool, system::error_code> IsChanged(const filesystem::path& old_file,
-                   const filesystem::path& new_file) {
+std::pair<bool, system::error_code> IsChanged(
+    const filesystem::path& old_file, const filesystem::path& new_file) {
   system::error_code error_code;
   auto old_write_time = filesystem::last_write_time(old_file, error_code);
   if (error_code.failed()) {
@@ -111,7 +111,7 @@ std::pair<bool, system::error_code> IsChanged(const filesystem::path& old_file,
     return {false, error_code};
   }
   if (filesystem::is_directory(old_file, error_code)) {
-     return {old_write_time < new_write_time, error_code};
+    return {old_write_time < new_write_time, error_code};
   }
   if (error_code.failed()) {
     return {false, error_code};
@@ -128,11 +128,15 @@ std::pair<bool, system::error_code> IsChanged(const filesystem::path& old_file,
   return {old_size != new_size && old_write_time != new_write_time, error_code};
 }
 
-system::error_code ProcessIncrementalUpdateFile(const filesystem::path& file_from_path, const filesystem::path& from_path, const filesystem::path& old_backup_file_path, const filesystem::path& new_backup_file_path) {
+system::error_code ProcessIncrementalUpdateFile(
+    const filesystem::path& file_from_path, const filesystem::path& from_path,
+    const filesystem::path& old_backup_file_path,
+    const filesystem::path& new_backup_file_path) {
   system::error_code error_code;
 
   bool file_exists = filesystem::exists(file_from_path, error_code);
-  if (error_code.failed() && error_code != system::errc::no_such_file_or_directory) {
+  if (error_code.failed() &&
+      error_code != system::errc::no_such_file_or_directory) {
     std::cout << std::format("can't check existance of {}. error message: {}",
                              file_from_path.string(), error_code.what());
     return error_code;
@@ -150,11 +154,12 @@ system::error_code ProcessIncrementalUpdateFile(const filesystem::path& file_fro
   if (!file_exists && old_backup_exists) {
     if (filesystem::is_directory(old_backup_file_path)) {
       filesystem::create_directories(new_backup_file_path);
-      const auto deleted_directory_tag_path = new_backup_file_path / utils::kDeleteMark;
+      const auto deleted_directory_tag_path =
+          new_backup_file_path / utils::kDeleteMark;
       filesystem::ofstream deleted_directory_tag(deleted_directory_tag_path);
       if (!deleted_directory_tag.is_open()) {
         std::cout << std::format("can't create {}",
-                                deleted_directory_tag_path.string());
+                                 deleted_directory_tag_path.string());
       }
       return error_code;
     }
@@ -170,10 +175,11 @@ system::error_code ProcessIncrementalUpdateFile(const filesystem::path& file_fro
   }
 
   bool changed;
-  if (auto&& [changed, error_code] = IsChanged(old_backup_file_path, file_from_path); (file_exists && !old_backup_exists) ||
+  if (auto&& [changed, error_code] =
+          IsChanged(old_backup_file_path, file_from_path);
+      (file_exists && !old_backup_exists) ||
       (file_exists && old_backup_exists && changed)) {
-    error_code =
-        CopyFile(file_from_path, new_backup_file_path, from_path);
+    error_code = CopyFile(file_from_path, new_backup_file_path, from_path);
     return error_code;
   }
 
@@ -273,7 +279,8 @@ void DoIncrementalBackup(const std::string& backup_from,
     const auto old_backup_file_path = last_full_backup / file_relative_path;
     const auto new_backup_file_path = to_path / file_relative_path;
 
-    error_code = ProcessIncrementalUpdateFile(file_from_path, from_path, old_backup_file_path, new_backup_file_path);
+    error_code = ProcessIncrementalUpdateFile(
+        file_from_path, from_path, old_backup_file_path, new_backup_file_path);
     if (error_code.failed()) {
       continue;
     }
