@@ -88,27 +88,6 @@ system::error_code CopyFile(const filesystem::path& file_path,
                     const filesystem::path& base) {
   system::error_code error_code;
 
-  if (filesystem::is_symlink(file_path, error_code)) {
-    auto actual_file_path = filesystem::read_symlink(file_path, error_code);
-    if (error_code.failed()) {
-      std::cout << std::format(
-          "failed to read symlink {}. error message : {}\n", file_path.string(),
-          error_code.what());
-      return error_code;
-    }
-    actual_file_path = filesystem::canonical(actual_file_path);
-    if (actual_file_path.string().starts_with(base.string())) {
-      return error_code;
-    }
-  }
-
-  if (error_code.failed()) {
-    std::cout << std::format(
-        "failed to check if {} is symlink. error message : {}\n",
-        file_path.string(), error_code.what());
-    return error_code;
-  }
-
   filesystem::copy(file_path, destination_path,
                    filesystem::copy_options::copy_symlinks, error_code);
   if (error_code.failed() && error_code != system::errc::file_exists) {
