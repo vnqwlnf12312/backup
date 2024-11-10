@@ -1,0 +1,2 @@
+/Users/amir/anaconda3/bin/ar qc libbackup_core.a CMakeFiles/backup_core.dir/run_my_backup.cpp.o CMakeFiles/backup_core.dir/do_backup.cpp.o
+/Users/amir/anaconda3/bin/ranlib libbackup_core.a

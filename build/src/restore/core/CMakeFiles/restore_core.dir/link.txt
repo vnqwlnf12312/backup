@@ -1,0 +1,2 @@
+/Users/amir/anaconda3/bin/ar qc librestore_core.a CMakeFiles/restore_core.dir/run_my_restore.cpp.o CMakeFiles/restore_core.dir/do_restore.cpp.o
+/Users/amir/anaconda3/bin/ranlib librestore_core.a
